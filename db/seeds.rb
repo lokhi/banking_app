@@ -5,3 +5,9 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+
+
+#Seed With the three master Wallet for the Company id 1
+Wallet.create(:current_balance => 0, :currency => "EUR", :company_id => 1, :master => true)
+Wallet.create(:current_balance => 0, :currency => "USD", :company_id => 1, :master => true)
+Wallet.create(:current_balance => 0, :currency => "GBP", :company_id => 1, :master => true)
