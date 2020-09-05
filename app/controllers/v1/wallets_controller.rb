@@ -3,7 +3,7 @@ module V1
 
     # GET /wallets
     def index
-      @wallets = Wallet.all
+      @wallets = Wallet.where(:company_id =>request.headers["Company-Id"])
 
       render json: @wallets
     end

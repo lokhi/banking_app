@@ -12,21 +12,21 @@ require 'rails_helper'
 # of tools you can use to make these specs even more expressive, but we're
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
-RSpec.describe "/wallets", type: :request do
+RSpec.describe "/cards", type: :request do
   # This should return the minimal set of attributes required to create a valid
-  # Wallet. As you add validations to Wallet, be sure to
+  # Card. As you add validations to Card, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    {:current_balance => 100.00,:currency => "EUR", :master => false}
+    {:wallet_id => FactoryBot.create(:company2_wallet_EUR).id}
   }
 
   let(:invalid_attributes) {
-      {:current_balance => -100.00,:currency => "YXZ", :master => false}
+    {:wallet_id => 99}
   }
 
   # This should return the minimal set of values that should be in the headers
   # in order to pass any filters (e.g. authentication) defined in
-  # WalletsController, or in your router and rack
+  # CardsController, or in your router and rack
   # middleware. Be sure to keep this updated too.
   let(:valid_headers) {
     {:"Company-Id" => 2, :"User-Id" => 3}
@@ -34,48 +34,46 @@ RSpec.describe "/wallets", type: :request do
 
   describe "GET /index" do
     it "renders a successful response" do
-      master_wallet_EUR = FactoryBot.create(:master_wallet_EUR)
-      master_wallet_USD = FactoryBot.create(:master_wallet_USD)
-      master_wallet_GBP = FactoryBot.create(:master_wallet_GBP)
-      company2_wallet_EUR = FactoryBot.create(:company2_wallet_EUR)
-
-      get v1_wallets_url, headers: valid_headers, as: :json
+      card = FactoryBot.create(:card)
+      get v1_cards_url, headers: valid_headers, as: :json
       expect(response).to be_successful
       expect(JSON.parse(response.body).size).to eq(1)
     end
   end
 
+
   describe "POST /create" do
     context "with valid parameters" do
-      it "creates a new Wallet" do
+      it "creates a new Card" do
         expect {
-          post v1_wallets_url,
-               params: { wallet: valid_attributes }, headers: valid_headers, as: :json
-        }.to change(Wallet, :count).by(1)
+          post v1_cards_url,
+               params: { card: valid_attributes }, headers: valid_headers, as: :json
+        }.to change(Card, :count).by(1)
       end
 
-      it "renders a JSON response with the new wallet" do
-        post v1_wallets_url,
-             params: { wallet: valid_attributes }, headers: valid_headers, as: :json
+      it "renders a JSON response with the new card" do
+        post v1_cards_url,
+             params: { card: valid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json; charset=utf-8"))
       end
     end
 
     context "with invalid parameters" do
-      it "does not create a new Wallet" do
+      it "does not create a new Card" do
         expect {
-          post v1_wallets_url,
-               params: { wallet: invalid_attributes }, as: :json
-        }.to change(Wallet, :count).by(0)
+          post v1_cards_url,
+               params: { card: invalid_attributes }, as: :json
+        }.to change(Card, :count).by(0)
       end
 
-      it "renders a JSON response with errors for the new wallet" do
-        post v1_wallets_url,
-             params: { wallet: invalid_attributes }, headers: valid_headers, as: :json
+      it "renders a JSON response with errors for the new card" do
+        post v1_cards_url,
+             params: { card: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json; charset=utf-8")
       end
     end
   end
+
 end

@@ -20,10 +20,10 @@ RSpec.describe Wallet, type: :model do
   end
 
   it "should not be valid if already exist a wallet with the same company id and the same currency" do
-      master_wallet_EUR = FactoryBot.create(:master_wallet_EUR)
-      subject.currency="EUR"
-      subject.company_id=1
-      subject.master = false
-      expect(subject.valid?).to eql(false)
+    master_wallet_EUR = FactoryBot.create(:master_wallet_EUR)
+    subject.currency="EUR"
+    subject.company_id=1
+    subject.master = false
+    expect(subject.valid?).to eql(false)
   end
 end
