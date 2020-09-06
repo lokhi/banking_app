@@ -65,7 +65,7 @@ module V1
       end
 
       def check_ownership
-        if request.headers["User-Id"] != @card.user_id
+        if request.headers["User-Id"].to_i != @card.user_id
             raise ApplicationController::Forbidden
         end
       end

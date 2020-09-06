@@ -50,7 +50,7 @@ module V1
       end
 
       def check_ownership
-        if request.headers["Company-Id"] != @origin_wallet.company_id || request.headers["Company-Id"] != @target_wallet.company_id
+        if request.headers["Company-Id"].to_i != @origin_wallet.company_id || request.headers["Company-Id"].to_i  != @target_wallet.company_id
             raise ApplicationController::Forbidden
         end
 

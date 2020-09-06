@@ -79,18 +79,18 @@ RSpec.describe "/cards", type: :request do
     end
   end
 
-  describe "POST /card/:id/load" do
+  describe "PATCH /card/:id/load" do
     context "with valid amount" do
       it "should load the card" do
           card = FactoryBot.create(:card)
-          post v1_load_card_url(card),
+          patch v1_load_card_url(card),
                params: { amount: 50 }, headers: valid_headers, as: :json
           card.reload
           expect(card.current_balance).to eq(150.00)
       end
       it "should unload the wallet" do
           card = FactoryBot.create(:card)
-          post v1_load_card_url(card),
+          patch v1_load_card_url(card),
                params: { amount: 50 }, headers: valid_headers, as: :json
           card.reload
           expect(card.wallet.current_balance).to eq(50.00)
@@ -98,7 +98,7 @@ RSpec.describe "/cards", type: :request do
       it "should create a transfer" do
           card = FactoryBot.create(:card)
           expect {
-            post v1_load_card_url(card),
+            patch v1_load_card_url(card),
                  params: { amount: 50 }, headers: valid_headers, as: :json
           }.to change(Transfer, :count).by(1)
       end
@@ -109,7 +109,7 @@ RSpec.describe "/cards", type: :request do
       it "does not load the Card" do
         card = FactoryBot.create(:card)
 
-        post v1_load_card_url(card),
+        patch v1_load_card_url(card),
              params: { amount: 500 }, headers: valid_headers, as: :json
         expect(card.current_balance).to eq(100.00)
       end
@@ -117,14 +117,14 @@ RSpec.describe "/cards", type: :request do
       it "does not unload the wallet" do
         card = FactoryBot.create(:card)
 
-        post v1_load_card_url(card),
+        patch v1_load_card_url(card),
              params: { amount: 500 }, headers: valid_headers, as: :json
         expect(card.wallet.current_balance).to eq(100.00)
       end
       it "should not create a transfer" do
           card = FactoryBot.create(:card)
           expect {
-            post v1_load_card_url(card),
+            patch v1_load_card_url(card),
                  params: { amount: 500 }, headers: valid_headers, as: :json
           }.to change(Transfer, :count).by(0)
       end
@@ -136,7 +136,7 @@ RSpec.describe "/cards", type: :request do
       it "should render 403" do
         card = FactoryBot.create(:card)
 
-        post v1_load_card_url(card),
+        patch v1_load_card_url(card),
              params: { amount: 50 }, headers: invalid_headers, as: :json
         expect(response.status).to eq(403)
       end
@@ -144,18 +144,18 @@ RSpec.describe "/cards", type: :request do
   end
 
 
-  describe "POST /card/:id/unload" do
+  describe "PATCH /card/:id/unload" do
     context "with valid amount" do
       it "should unload the card" do
           card = FactoryBot.create(:card)
-          post v1_unload_card_url(card),
+          patch v1_unload_card_url(card),
                params: { amount: 50 }, headers: valid_headers, as: :json
           card.reload
           expect(card.current_balance).to eq(50.00)
       end
       it "should load the wallet" do
           card = FactoryBot.create(:card)
-          post v1_unload_card_url(card),
+          patch v1_unload_card_url(card),
                params: { amount: 50 }, headers: valid_headers, as: :json
           card.reload
           expect(card.wallet.current_balance).to eq(150.00)
@@ -163,7 +163,7 @@ RSpec.describe "/cards", type: :request do
       it "should create a transfer" do
           card = FactoryBot.create(:card)
           expect {
-            post v1_unload_card_url(card),
+            patch v1_unload_card_url(card),
                  params: { amount: 50 }, headers: valid_headers, as: :json
           }.to change(Transfer, :count).by(1)
       end
@@ -174,14 +174,14 @@ RSpec.describe "/cards", type: :request do
       it "does not load the Card" do
         card = FactoryBot.create(:card)
 
-        post v1_unload_card_url(card),
+        patch v1_unload_card_url(card),
              params: { amount: 500 }, headers: valid_headers, as: :json
         expect(card.current_balance).to eq(100.00)
       end
       it "it should return 422" do
         card = FactoryBot.create(:card)
 
-        post v1_unload_card_url(card),
+        patch v1_unload_card_url(card),
              params: { amount: "abc" }, headers: valid_headers, as: :json
         expect(response.status).to eq(422)
       end
@@ -191,7 +191,7 @@ RSpec.describe "/cards", type: :request do
       it "should render 403" do
         card = FactoryBot.create(:card)
 
-        post v1_unload_card_url(card),
+        patch v1_unload_card_url(card),
              params: { amount: 500 }, headers: invalid_headers, as: :json
         expect(response.status).to eq(403)
       end
