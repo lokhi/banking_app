@@ -21,8 +21,4 @@ test:
   database: db/test.sqlite3
 
 production:
-  adapter: postgresql
-  encoding: unicode
-  database: banking_app_production
-  username: banking_app
-  password: <%= ENV['LISTE2NAISSANCE_DATABASE_PASSWORD'] %>
+  url: <%= ENV['DATABASE_URL'] %>
