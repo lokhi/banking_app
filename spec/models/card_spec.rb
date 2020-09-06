@@ -23,5 +23,34 @@ RSpec.describe Card, type: :model do
     expect(subject.valid?).to eql(false)
   end
 
-  #todo test generate
+  describe "generate" do
+    it "sould set the ccv with 3 numbers string" do
+      subject = FactoryBot.create(:card)
+      subject.generate
+      expect(subject.ccv.size).to eql(3)
+      expect(subject.ccv !~ /\D/).to eql(true)
+    end
+
+    it "sould set the card numbers with 16 numbers string" do
+      subject = FactoryBot.create(:card)
+      subject.generate
+      expect(subject.numbers.size).to eql(16)
+      expect(subject.ccv !~ /\D/).to eql(true)
+    end
+
+    it "sould set the expiration date in one months" do
+      subject = FactoryBot.create(:card)
+      subject.generate
+      expect(subject.expiration_date).to eql(Date.today + 1.month)
+    end
+  end
+
+  describe "load_money" do
+    it "sould add the amount in current_balance" do
+      subject = FactoryBot.create(:card)
+      subject.generate
+      expect(subject.ccv.size).to eql(3)
+      expect(subject.ccv !~ /\D/).to eql(true)
+    end
+  end
 end

@@ -1,10 +1,12 @@
 class Card < ApplicationRecord
+    include OriginTransfer
+    include TargetTransfer
     belongs_to :wallet
 
 
     validates :wallet_id,:current_balance, :currency, :user_id,:numbers,:expiration_date,:ccv,:status, presence: true
 
-    validates :current_balance, numericality: true
+    validates :current_balance, :numericality => { :greater_than_or_equal_to => 0 }
     validates :user_id, numericality: { only_integer: true }
     validates :currency, inclusion: { in: %w(EUR USD GBP),message: "%{value} is not a valid currency" }
     validates_length_of :numbers, minimum: 16, maximum: 16, allow_blank: false
@@ -26,6 +28,26 @@ class Card < ApplicationRecord
       self.numbers = generate_numbers
       self.expiration_date = Date.today + 1.month
       self.ccv = generate_ccv
+    end
+
+
+    def load_money(amount)
+      self.current_balance += amount
+      self.save!
+    end
+
+    def unload_money(amount)
+      self.current_balance -= amount
+      self.save!
+    end
+
+    def unlock
+        self.status = 1
+        self.save
+    end
+    def lock
+        self.status = 0
+        self.save
     end
 
 

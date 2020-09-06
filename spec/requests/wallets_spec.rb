@@ -32,6 +32,18 @@ RSpec.describe "/wallets", type: :request do
     {:"Company-Id" => 2, :"User-Id" => 3}
   }
 
+  let(:invalid_headers) {
+    {:"Company-Id" => 3, :"User-Id" => 4}
+  }
+
+  let(:json_response) {
+    File.open("./spec/fixer.json")
+  }
+
+  let(:url_stub) {
+    "http://data.fixer.io/api/latest?access_key=#{ENV["FIXER_KEY_API"]}&base=&symbols=USD"
+  }
+
   describe "GET /index" do
     it "renders a successful response" do
       master_wallet_EUR = FactoryBot.create(:master_wallet_EUR)
@@ -78,4 +90,109 @@ RSpec.describe "/wallets", type: :request do
       end
     end
   end
+
+  describe "PATCH /wallets/:origin_wallet/to/:target_wallet" do
+    context "with valid parameters" do
+      it "should unload the origin wallet" do
+          stub_request(:get, url_stub ).to_return(status: 200,body: json_response,  headers: {"Content-Type" => "application/json"})
+          origin_wallet = FactoryBot.create(:company2_wallet_EUR)
+          target_wallet = FactoryBot.create(:company2_wallet_USD)
+          master_wallet_USD = FactoryBot.create(:master_wallet_USD)
+          patch v1_transfer_wallet_url(origin_wallet,target_wallet),
+               params: { amount: 50 }, headers: valid_headers, as: :json
+          origin_wallet.reload
+          expect(origin_wallet.current_balance).to eq(50.00)
+      end
+
+      it "should load the target wallet" do
+          stub_request(:get, url_stub).to_return(status: 200,body: json_response,  headers: {"Content-Type" => "application/json"})
+          origin_wallet = FactoryBot.create(:company2_wallet_EUR)
+          target_wallet = FactoryBot.create(:company2_wallet_USD)
+          master_wallet_USD = FactoryBot.create(:master_wallet_USD)
+          patch v1_transfer_wallet_url(origin_wallet,target_wallet),
+               params: { amount: 50 }, headers: valid_headers, as: :json
+          target_wallet.reload
+          expect(target_wallet.current_balance).to eq(157.48)
+      end
+
+      it "should load a master wallet with fee" do
+          stub_request(:get, url_stub).to_return(status: 200,body: json_response,  headers: {"Content-Type" => "application/json"})
+          origin_wallet = FactoryBot.create(:company2_wallet_EUR)
+          target_wallet = FactoryBot.create(:company2_wallet_USD)
+          master_wallet_USD = FactoryBot.create(:master_wallet_USD)
+          patch v1_transfer_wallet_url(origin_wallet,target_wallet),
+               params: { amount: 50 }, headers: valid_headers, as: :json
+          master_wallet_USD.reload
+          expect(master_wallet_USD.current_balance).to eq(1.72)
+      end
+    end
+
+    context "with unvalid parameters" do
+      it "should return a 422" do
+          stub_request(:get, url_stub ).to_return(status: 200,body: json_response,  headers: {"Content-Type" => "application/json"})
+          origin_wallet = FactoryBot.create(:company2_wallet_EUR)
+          target_wallet = FactoryBot.create(:company2_wallet_USD)
+          master_wallet_USD = FactoryBot.create(:master_wallet_USD)
+          patch v1_transfer_wallet_url(origin_wallet,target_wallet),
+               params: { amount: 500 }, headers: valid_headers, as: :json
+          expect(response.status).to eq(422)
+      end
+      it "should not unload the origin wallet" do
+          stub_request(:get, url_stub ).to_return(status: 200,body: json_response,  headers: {"Content-Type" => "application/json"})
+          origin_wallet = FactoryBot.create(:company2_wallet_EUR)
+          target_wallet = FactoryBot.create(:company2_wallet_USD)
+          master_wallet_USD = FactoryBot.create(:master_wallet_USD)
+          patch v1_transfer_wallet_url(origin_wallet,target_wallet),
+               params: { amount: 500 }, headers: valid_headers, as: :json
+          origin_wallet.reload
+          expect(origin_wallet.current_balance).to eq(100.00)
+      end
+
+      it "should not load the target wallet" do
+          stub_request(:get, url_stub).to_return(status: 200,body: json_response,  headers: {"Content-Type" => "application/json"})
+          origin_wallet = FactoryBot.create(:company2_wallet_EUR)
+          target_wallet = FactoryBot.create(:company2_wallet_USD)
+          master_wallet_USD = FactoryBot.create(:master_wallet_USD)
+          patch v1_transfer_wallet_url(origin_wallet,target_wallet),
+               params: { amount: 500 }, headers: valid_headers, as: :json
+          target_wallet.reload
+          expect(target_wallet.current_balance).to eq(100.00)
+      end
+
+      it "should not load a master wallet with fee" do
+          stub_request(:get, url_stub).to_return(status: 200,body: json_response,  headers: {"Content-Type" => "application/json"})
+          origin_wallet = FactoryBot.create(:company2_wallet_EUR)
+          target_wallet = FactoryBot.create(:company2_wallet_USD)
+          master_wallet_USD = FactoryBot.create(:master_wallet_USD)
+          patch v1_transfer_wallet_url(origin_wallet,target_wallet),
+               params: { amount: 500 }, headers: valid_headers, as: :json
+          master_wallet_USD.reload
+          expect(master_wallet_USD.current_balance).to eq(0.00)
+      end
+    end
+    context "with invalid header" do
+      it "should return a 403" do
+          stub_request(:get, url_stub ).to_return(status: 200,body: json_response,  headers: {"Content-Type" => "application/json"})
+          origin_wallet = FactoryBot.create(:company2_wallet_EUR)
+          target_wallet = FactoryBot.create(:company2_wallet_USD)
+          master_wallet_USD = FactoryBot.create(:master_wallet_USD)
+          patch v1_transfer_wallet_url(origin_wallet,target_wallet),
+               params: { amount: 50 }, headers: invalid_headers, as: :json
+          expect(response.status).to eq(403)
+      end
+    end
+
+    context "with invalid wallet" do
+      it "should return a 403" do
+          stub_request(:get, url_stub ).to_return(status: 200,body: json_response,  headers: {"Content-Type" => "application/json"})
+          origin_wallet = FactoryBot.create(:company2_wallet_EUR)
+          target_wallet = FactoryBot.create(:company3_wallet_USD)
+          master_wallet_USD = FactoryBot.create(:master_wallet_USD)
+          patch v1_transfer_wallet_url(origin_wallet,target_wallet),
+               params: { amount: 50 }, headers: valid_headers, as: :json
+          expect(response.status).to eq(403)
+      end
+    end
+  end
+
 end

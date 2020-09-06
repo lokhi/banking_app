@@ -31,6 +31,9 @@ RSpec.describe "/cards", type: :request do
   let(:valid_headers) {
     {:"Company-Id" => 2, :"User-Id" => 3}
   }
+  let(:invalid_headers) {
+    {:"Company-Id" => 3, :"User-Id" => 4}
+  }
 
   describe "GET /index" do
     it "renders a successful response" do
@@ -72,6 +75,193 @@ RSpec.describe "/cards", type: :request do
              params: { card: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json; charset=utf-8")
+      end
+    end
+  end
+
+  describe "POST /card/:id/load" do
+    context "with valid amount" do
+      it "should load the card" do
+          card = FactoryBot.create(:card)
+          post v1_load_card_url(card),
+               params: { amount: 50 }, headers: valid_headers, as: :json
+          card.reload
+          expect(card.current_balance).to eq(150.00)
+      end
+      it "should unload the wallet" do
+          card = FactoryBot.create(:card)
+          post v1_load_card_url(card),
+               params: { amount: 50 }, headers: valid_headers, as: :json
+          card.reload
+          expect(card.wallet.current_balance).to eq(50.00)
+      end
+      it "should create a transfer" do
+          card = FactoryBot.create(:card)
+          expect {
+            post v1_load_card_url(card),
+                 params: { amount: 50 }, headers: valid_headers, as: :json
+          }.to change(Transfer, :count).by(1)
+      end
+
+    end
+
+    context "with invalid amount" do
+      it "does not load the Card" do
+        card = FactoryBot.create(:card)
+
+        post v1_load_card_url(card),
+             params: { amount: 500 }, headers: valid_headers, as: :json
+        expect(card.current_balance).to eq(100.00)
+      end
+
+      it "does not unload the wallet" do
+        card = FactoryBot.create(:card)
+
+        post v1_load_card_url(card),
+             params: { amount: 500 }, headers: valid_headers, as: :json
+        expect(card.wallet.current_balance).to eq(100.00)
+      end
+      it "should not create a transfer" do
+          card = FactoryBot.create(:card)
+          expect {
+            post v1_load_card_url(card),
+                 params: { amount: 500 }, headers: valid_headers, as: :json
+          }.to change(Transfer, :count).by(0)
+      end
+
+    end
+
+
+    context "with invalid header" do
+      it "should render 403" do
+        card = FactoryBot.create(:card)
+
+        post v1_load_card_url(card),
+             params: { amount: 50 }, headers: invalid_headers, as: :json
+        expect(response.status).to eq(403)
+      end
+    end
+  end
+
+
+  describe "POST /card/:id/unload" do
+    context "with valid amount" do
+      it "should unload the card" do
+          card = FactoryBot.create(:card)
+          post v1_unload_card_url(card),
+               params: { amount: 50 }, headers: valid_headers, as: :json
+          card.reload
+          expect(card.current_balance).to eq(50.00)
+      end
+      it "should load the wallet" do
+          card = FactoryBot.create(:card)
+          post v1_unload_card_url(card),
+               params: { amount: 50 }, headers: valid_headers, as: :json
+          card.reload
+          expect(card.wallet.current_balance).to eq(150.00)
+      end
+      it "should create a transfer" do
+          card = FactoryBot.create(:card)
+          expect {
+            post v1_unload_card_url(card),
+                 params: { amount: 50 }, headers: valid_headers, as: :json
+          }.to change(Transfer, :count).by(1)
+      end
+
+    end
+
+    context "with invalid amount" do
+      it "does not load the Card" do
+        card = FactoryBot.create(:card)
+
+        post v1_unload_card_url(card),
+             params: { amount: 500 }, headers: valid_headers, as: :json
+        expect(card.current_balance).to eq(100.00)
+      end
+      it "it should return 422" do
+        card = FactoryBot.create(:card)
+
+        post v1_unload_card_url(card),
+             params: { amount: "abc" }, headers: valid_headers, as: :json
+        expect(response.status).to eq(422)
+      end
+    end
+
+    context "with invalid header" do
+      it "should render 403" do
+        card = FactoryBot.create(:card)
+
+        post v1_unload_card_url(card),
+             params: { amount: 500 }, headers: invalid_headers, as: :json
+        expect(response.status).to eq(403)
+      end
+    end
+  end
+
+
+
+
+
+  describe "PATCH /card/:id/lock" do
+    context "lock card" do
+      it "should unload the card" do
+          card = FactoryBot.create(:card)
+          patch v1_lock_card_url(card),
+               params: { }, headers: valid_headers, as: :json
+          card.reload
+          expect(card.current_balance).to eq(0.00)
+      end
+      it "should load the wallet" do
+          card = FactoryBot.create(:card)
+          patch v1_lock_card_url(card),
+               params: {  }, headers: valid_headers, as: :json
+          card.reload
+          expect(card.wallet.current_balance).to eq(200.00)
+      end
+      it "should create a transfer" do
+          card = FactoryBot.create(:card)
+          expect {
+            patch v1_lock_card_url(card),
+                 params: {  }, headers: valid_headers, as: :json
+          }.to change(Transfer, :count).by(1)
+      end
+      it "should lock the card" do
+          card = FactoryBot.create(:card)
+          patch v1_lock_card_url(card),
+               params: { }, headers: valid_headers, as: :json
+          card.reload
+          expect(card.status).to eq(0)
+      end
+    end
+
+
+    context "with invalid header" do
+      it "should render 403" do
+        card = FactoryBot.create(:card)
+        patch v1_lock_card_url(card),
+             params: { }, headers: invalid_headers, as: :json
+        expect(response.status).to eq(403)
+      end
+    end
+  end
+
+  describe "PATCH /card/:id/unlock" do
+    context "unlock card" do
+      it "should unlock the card" do
+          card = FactoryBot.create(:card)
+          patch v1_unlock_card_url(card),
+               params: {}, headers: valid_headers, as: :json
+          card.reload
+          expect(card.status).to eq(1)
+      end
+    end
+
+    context "with invalid header" do
+      it "should render 403" do
+        card = FactoryBot.create(:card)
+        patch v1_unlock_card_url(card),
+             params: {}, headers: invalid_headers, as: :json
+        expect(response.status).to eq(403)
       end
     end
   end

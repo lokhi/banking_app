@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_05_133334) do
+ActiveRecord::Schema.define(version: 2020_09_05_150008) do
 
   create_table "cards", force: :cascade do |t|
     t.integer "wallet_id"
@@ -23,6 +23,22 @@ ActiveRecord::Schema.define(version: 2020_09_05_133334) do
     t.integer "status", default: 1
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "transfers", force: :cascade do |t|
+    t.decimal "amount"
+    t.string "origin_currency"
+    t.string "target_currency"
+    t.decimal "conversion_fee", precision: 12, scale: 2, default: "0.0"
+    t.string "origin_transfer_type"
+    t.integer "origin_transfer_id"
+    t.string "target_transfer_type"
+    t.integer "target_transfer_id"
+    t.integer "user_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["origin_transfer_type", "origin_transfer_id"], name: "index_transfers_on_origin_transfer_type_and_origin_transfer_id"
+    t.index ["target_transfer_type", "target_transfer_id"], name: "index_transfers_on_target_transfer_type_and_target_transfer_id"
   end
 
   create_table "wallets", force: :cascade do |t|
