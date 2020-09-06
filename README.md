@@ -1,6 +1,7 @@
 # Banking-API
 
 ## Install on your machine
+If you don't want to install the environment on your machine you can use this base URL [https://banking-app-lp.herokuapp.com/](https://banking-app-lp.herokuapp.com/) or jump to the heroku section ⬇️
 ### Clone the repository
 
 ```shell
@@ -23,8 +24,6 @@ rvm install 2.6.6
 ```
 
 ### Install dependencies
-
-Using [Bundler](https://github.com/bundler/bundler)
 
 ```shell
 bundle install --without production
@@ -53,11 +52,16 @@ bundle exec rails s
 And now you can reach the different api with the  BASE URL http://localhost:3000
 
 
-## Test
+### Test
 You wan launch test with the following command
 ```ruby
 bundle exec rspec
 ```
+## Heroku
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/lokhi/banking_app.git)
+
+Don't forget to add the env var `FIXER_KEY_API` from [fixer.io](https://fixer.io) API.
 
 ## API Documentation
 
