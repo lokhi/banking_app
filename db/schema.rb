@@ -12,6 +12,9 @@
 
 ActiveRecord::Schema.define(version: 2020_09_05_150008) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "cards", force: :cascade do |t|
     t.integer "wallet_id"
     t.string "currency"
@@ -31,9 +34,9 @@ ActiveRecord::Schema.define(version: 2020_09_05_150008) do
     t.string "target_currency"
     t.decimal "conversion_fee", precision: 12, scale: 2, default: "0.0"
     t.string "origin_transfer_type"
-    t.integer "origin_transfer_id"
+    t.bigint "origin_transfer_id"
     t.string "target_transfer_type"
-    t.integer "target_transfer_id"
+    t.bigint "target_transfer_id"
     t.integer "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false

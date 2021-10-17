@@ -2,6 +2,7 @@
 
 ## Install on your machine
 If you don't want to install the environment on your machine you can use this base URL [https://banking-app-lp.herokuapp.com/](https://banking-app-lp.herokuapp.com/) or jump to the heroku section ⬇️
+You could also use docker and docker compose to test the project
 ### Clone the repository
 
 ```shell
@@ -57,6 +58,34 @@ You wan launch test with the following command
 ```ruby
 bundle exec rspec
 ```
+
+## Docker and Docker compose
+
+Build containers
+```
+docker-compose build
+```
+
+Create database
+```
+docker-compose run web bundle exec rake db:create
+```
+
+Run migrations 
+```
+docker-compose run web bundle exec rake db:migration
+```
+
+Run spec
+```
+docker-compose run web bundle exec rspec spec/*
+```
+
+Run app 
+```
+docker-compose up
+```
+
 ## Heroku
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/lokhi/banking_app.git)
