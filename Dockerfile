@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM ruby:2.6.6
+FROM ruby:2.7.8
 RUN apt-get update -qq && apt-get install -y postgresql-client
 WORKDIR /banking_app
 COPY Gemfile /banking_app/Gemfile
