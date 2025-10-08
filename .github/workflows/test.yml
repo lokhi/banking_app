@@ -17,14 +17,14 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7.8
+          ruby-version: 3.3.9
 
       - name: Install dependent libraries
         run: sudo apt-get install libpq-dev
 
       - name: Bundle install
         run: |
-          gem install bundler -v 2.4.22
+          gem install bundler -v 2.5.3
           bundle install --jobs 4 --retry 3
 
       - name: Setup Database
