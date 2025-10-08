@@ -105,7 +105,7 @@ GEM
     minitest (5.25.1)
     msgpack (1.8.0)
     multi_xml (0.6.0)
-    net-imap (0.4.17)
+    net-imap (0.5.12)
       date
       net-protocol
     net-pop (0.1.2)
